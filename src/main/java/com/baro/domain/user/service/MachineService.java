@@ -1,6 +1,7 @@
 package com.baro.domain.user.service;
 
 import com.baro.domain.user.domain.Machine;
+import com.baro.domain.user.repository.DTO.MachineLoginDTO;
 import com.baro.domain.user.repository.DTO.MachineRegisterDTO;
 import com.baro.domain.user.repository.JPAMachineRepository;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,33 @@ public class MachineService {
      * 1. temp register
      * 2. temp login
      */
+    public Machine find_machine_data_service(String machineId){
+        return  machineRepository.findById(machineId);
+    }
+    public String machine_login_service(MachineLoginDTO machineLoginDTO){
+        String return_text;
+
+        log.info("machineLogin Service {}", machineLoginDTO.getMachineId());
+        if(machineRepository.existsById(machineLoginDTO.getMachineId())){
+            //id 가 존재
+            Machine machine = machineRepository.findById(machineLoginDTO.getMachineId());
+            //log.info("machone pass {} , {}",machine.getPassword() , machineLoginDTO.getMachinePassword());
+            if(machine.getPassword().equals(machineLoginDTO.getMachinePassWord())){
+                //로그인성공
+                return_text = "success";
+            }else{
+                //로그인실패
+                log.info("패스워드가 틀렸습니다. {}" , machineLoginDTO.getMachineId());
+                return_text ="패스워드가 틀렸습니다.";
+            }
+
+        }else{
+            //존재 하지 않음
+            log.info("존재하지않은 로그인 시도 {}" , machineLoginDTO.getMachineId());
+            return_text="id가 존재하지 않습니다.";
+        }
+        return return_text;
+    }
 
     public String machine_register_service(MachineRegisterDTO machineRegisterDTO){
         String return_text;

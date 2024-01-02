@@ -4,4 +4,5 @@ import com.baro.domain.user.domain.Admin;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface JPAAdminRepository extends JpaRepository<Admin, Long> {
+    boolean existsById(String id);
 }

@@ -14,4 +14,5 @@ public class BaseDAO {
     private int amount;
     private int alcohol;
     private  String content;
+    private String imgURL;
 }

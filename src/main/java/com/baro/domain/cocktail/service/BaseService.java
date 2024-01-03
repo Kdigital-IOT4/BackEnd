@@ -1,6 +1,7 @@
 package com.baro.domain.cocktail.service;
 
 import com.baro.domain.cocktail.domain.Base;
+import com.baro.domain.cocktail.repository.DAO.BaseDAO;
 import com.baro.domain.cocktail.repository.DAO.LIstBaseDAO;
 import com.baro.domain.cocktail.repository.DTO.BaseUploadDTO;
 import com.baro.domain.cocktail.repository.JPABaseRepository;
@@ -20,6 +21,32 @@ import java.util.stream.Collectors;
 public class BaseService {
     private final JPABaseRepository baseRepository;
 
+    public BaseDAO base_object_service(Long seq){
+        if(baseRepository.existsById(seq)){
+            //존재
+            Base baseData = baseRepository.findBySeq(seq);
+            BaseDAO baseDAO = convertToBase(baseData);
+            return baseDAO;
+        }else{
+            //존재하지않음
+            log.info("존재하지않은 베이스");
+            return null;
+        }
+
+    }
+
+    private BaseDAO convertToBase(Base base){
+        BaseDAO baseDAO = new BaseDAO();
+        baseDAO.setKR_Name(base.getKrName());
+        baseDAO.setEN_Name(base.getName());
+        baseDAO.setPrice(base.getPrice());
+        baseDAO.setAmount(base.getAmount());
+        baseDAO.setAlcohol(base.getAlcohol());
+        baseDAO.setContent(base.getContentL());
+        baseDAO.setImgURL(base.getFileURL());
+
+        return baseDAO;
+    }
 
     public List<LIstBaseDAO> base_list_service(){
         List<Base> baseList = baseRepository.findAll();
@@ -45,6 +72,10 @@ public class BaseService {
     public boolean checkBase(String base_en_name){
        return baseRepository.existsByName(base_en_name);
     }
+    public boolean checkBaseToSeq(Long baseSeq){
+        return baseRepository.existsById(baseSeq);
+    }
+
 
 
     public String base_upload_service(String imgURL , BaseUploadDTO baseUploadDTO){

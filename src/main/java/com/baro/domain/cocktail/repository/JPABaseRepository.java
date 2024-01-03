@@ -11,4 +11,6 @@ public interface JPABaseRepository extends JpaRepository<Base, Long> {
 
     // 데이터 전체 조회
     List<Base> findAll();
+
+    Base findBySeq(Long seq);
 }

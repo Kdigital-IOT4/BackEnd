@@ -1,5 +1,6 @@
 package com.baro.domain.cocktail.controller;
 
+import com.baro.domain.cocktail.repository.DAO.BaseDAO;
 import com.baro.domain.cocktail.repository.DAO.LIstBaseDAO;
 import com.baro.domain.cocktail.repository.DTO.BaseUploadDTO;
 import com.baro.domain.cocktail.service.BaseService;
@@ -76,12 +77,20 @@ public class BaseController {
 
     }
 
-    @GetMapping("/base/{seq}")
-    public ResponseEntity base_all_list_controller(@PathVariable Long seq){
+    @GetMapping("/{seq}")
+    public ResponseEntity base_object_controller(@PathVariable Long seq){
         /**
          * base data 하나의 객체 주는 컨트롤러
          */
-        return null;
+        if(baseService.checkBaseToSeq(seq)){
+            //존재
+            log.info("base find Start");
+            BaseDAO baseDAO = baseService.base_object_service(seq);
+            return ResponseEntity.ok(baseDAO);
+        }else{
+            //존재하지않음
+            return  ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("존재하지 않는 베이스입니다.");
+        }
     }
 
 

@@ -2,6 +2,10 @@ package com.baro.domain.cocktail.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Builder
@@ -35,4 +39,16 @@ public class Cocktail {
     private int alcohol;
     @Column(name = "FILE_URL" , nullable = false , length = 300)
     private String fileURL;
+
+    @Column(name = "CONTENT" , nullable = false , length = 400)
+    private String contentL;
+
+    @Column(name = "IS_CREATED" , nullable = false)
+    @CreationTimestamp
+    private LocalDateTime isCreated;
+    @Column(name = "IS_UPDATED" , nullable = false)
+    @UpdateTimestamp
+    private LocalDateTime isUpdated;
+    @Column(name = "IS_DELETED" , nullable = false)
+    private boolean isDELETED;
 }

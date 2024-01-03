@@ -22,7 +22,7 @@ public class ImgUploadService {
     public String uploadFile(MultipartFile file , String folder , String name) {
         try {
             String key = folder + "/" + name;
-            String fileUrl = "https://" + bucket + "/" + key;
+            String fileUrl = "https://" + bucket +".s3.ap-northeast-2.amazonaws.com"+ "/" + key;
             ObjectMetadata metadata= new ObjectMetadata();
             metadata.setContentType(file.getContentType());
             metadata.setContentLength(file.getSize());

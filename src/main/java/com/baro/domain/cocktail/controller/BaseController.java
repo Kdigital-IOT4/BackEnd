@@ -1,5 +1,6 @@
 package com.baro.domain.cocktail.controller;
 
+import com.baro.domain.cocktail.repository.DAO.LIstBaseDAO;
 import com.baro.domain.cocktail.repository.DTO.BaseUploadDTO;
 import com.baro.domain.cocktail.service.BaseService;
 import com.baro.domain.user.service.ImgUploadService;
@@ -9,6 +10,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -58,4 +61,29 @@ public class BaseController {
             }
         }
     }
+
+    @GetMapping("/listBase")
+    public ResponseEntity base_all_list_controller(){
+        /**
+         * base data 미리보기용 리스트 주는 컨트롤러
+         */
+       List<LIstBaseDAO> baseList =  baseService.base_list_service();
+       if(baseList.isEmpty()){
+           return  ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("null");
+       }else{
+           return ResponseEntity.ok(baseList);
+       }
+
+    }
+
+    @GetMapping("/base/{seq}")
+    public ResponseEntity base_all_list_controller(@PathVariable Long seq){
+        /**
+         * base data 하나의 객체 주는 컨트롤러
+         */
+        return null;
+    }
+
+
+
 }

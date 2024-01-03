@@ -1,6 +1,7 @@
 package com.baro.domain.cocktail.service;
 
 import com.baro.domain.cocktail.domain.Base;
+import com.baro.domain.cocktail.repository.DAO.LIstBaseDAO;
 import com.baro.domain.cocktail.repository.DTO.BaseUploadDTO;
 import com.baro.domain.cocktail.repository.JPABaseRepository;
 import lombok.RequiredArgsConstructor;
@@ -10,11 +11,36 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class BaseService {
     private final JPABaseRepository baseRepository;
+
+
+    public List<LIstBaseDAO> base_list_service(){
+        List<Base> baseList = baseRepository.findAll();
+
+        List<LIstBaseDAO> listBaseDAOList = baseList.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+
+        return listBaseDAOList;
+    }
+
+    private LIstBaseDAO convertToDTO(Base base) {
+        LIstBaseDAO listBaseDAO = new LIstBaseDAO();
+        listBaseDAO.setSeq(base.getSeq());
+        listBaseDAO.setEN_Name(base.getName());
+        listBaseDAO.setKR_Name(base.getKrName());
+        listBaseDAO.setFileURL(base.getFileURL());
+
+
+        return listBaseDAO;
+    }
 
     public boolean checkBase(String base_en_name){
        return baseRepository.existsByName(base_en_name);
@@ -33,6 +59,7 @@ public class BaseService {
                             .amount(baseUploadDTO.getAmount())
                             .alcohol(baseUploadDTO.getAlcohol())
                             .fileURL(imgURL)
+                            .contentL(baseUploadDTO.getContent())
                             .build()
             );
             log.info("베이스 업로드 완료...");

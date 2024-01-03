@@ -19,14 +19,14 @@ public class ImgUploadService {
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
 
-    public String uploadFile(MultipartFile file) {
+    public String uploadFile(MultipartFile file , String folder , String name) {
         try {
-            String fileName=file.getOriginalFilename();
-            String fileUrl= "https://" + bucket + "/test" +fileName;
+            String key = folder + "/" + name;
+            String fileUrl = "https://" + bucket +".s3.ap-northeast-2.amazonaws.com"+ "/" + key;
             ObjectMetadata metadata= new ObjectMetadata();
             metadata.setContentType(file.getContentType());
             metadata.setContentLength(file.getSize());
-            amazonS3Client.putObject(bucket,fileName,file.getInputStream(),metadata);
+            amazonS3Client.putObject(bucket,key,file.getInputStream(),metadata);
             return fileUrl;
         } catch (IOException e) {
             log.info("upload file Error : {}" , e);

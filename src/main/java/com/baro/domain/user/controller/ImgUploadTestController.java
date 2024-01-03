@@ -20,7 +20,7 @@ public class ImgUploadTestController {
     private  final ImgUploadService imgUploadService;
     @PostMapping("/s3/imgUpload")
     public ResponseEntity machine_login_controller(@RequestParam("file") MultipartFile file){
-        String return_text = imgUploadService.uploadFile(file);
+        String return_text = imgUploadService.uploadFile(file , "test" , file.getName());
         if(return_text.equals("fail")){
             log.warn("IMG upload Error");
             return  ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(return_text);

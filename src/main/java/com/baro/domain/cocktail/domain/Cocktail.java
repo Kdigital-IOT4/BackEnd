@@ -35,13 +35,15 @@ public class Cocktail {
     private String krName;
     @Column(name = "PRICE" , nullable = false)
     private int price;
+    @Column(name = "AMOUNT" , nullable = false)
+    private int amount;
     @Column(name = "ALCOHOL" , nullable = false)
     private int alcohol;
     @Column(name = "FILE_URL" , nullable = false , length = 300)
     private String fileURL;
 
     @Column(name = "CONTENT" , nullable = false , length = 400)
-    private String contentL;
+    private String content;
 
     @Column(name = "IS_CREATED" , nullable = false)
     @CreationTimestamp

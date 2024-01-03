@@ -13,4 +13,5 @@ public interface JPABaseRepository extends JpaRepository<Base, Long> {
     List<Base> findAll();
 
     Base findBySeq(Long seq);
+    Base findByName(String en_name);
 }

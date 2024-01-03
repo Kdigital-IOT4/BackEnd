@@ -21,6 +21,24 @@ import java.util.stream.Collectors;
 public class BaseService {
     private final JPABaseRepository baseRepository;
 
+    /**
+     * 다른곳에도 사용되는 애들
+     */
+    public boolean checkBase(String base_en_name){
+        return baseRepository.existsByName(base_en_name);
+    }
+    public boolean checkBaseToSeq(Long baseSeq){
+        return baseRepository.existsById(baseSeq);
+    }
+
+    public Base findBase(String base_en_name){
+       return baseRepository.findByName(base_en_name);
+    }
+
+    /**
+     * 다른곳에도 사용되는 애들
+     */
+
     public BaseDAO base_object_service(Long seq){
         if(baseRepository.existsById(seq)){
             //존재
@@ -68,15 +86,6 @@ public class BaseService {
 
         return listBaseDAO;
     }
-
-    public boolean checkBase(String base_en_name){
-       return baseRepository.existsByName(base_en_name);
-    }
-    public boolean checkBaseToSeq(Long baseSeq){
-        return baseRepository.existsById(baseSeq);
-    }
-
-
 
     public String base_upload_service(String imgURL , BaseUploadDTO baseUploadDTO){
         log.info("base upload service start");

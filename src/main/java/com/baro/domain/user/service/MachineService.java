@@ -1,8 +1,11 @@
 package com.baro.domain.user.service;
 
+import com.baro.domain.cocktail.domain.Base;
 import com.baro.domain.user.domain.Machine;
+import com.baro.domain.user.domain.MachineBase;
 import com.baro.domain.user.repository.DTO.MachineLoginDTO;
 import com.baro.domain.user.repository.DTO.MachineRegisterDTO;
+import com.baro.domain.user.repository.JPAMachineBaseRepository;
 import com.baro.domain.user.repository.JPAMachineRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -10,12 +13,16 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
 import org.springframework.dao.DataAccessException;
+
+import java.util.List;
+
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class MachineService {
     private final JPAMachineRepository machineRepository;
-
+    private final JPAMachineBaseRepository machineBaseRepository;
+    private final MachineBaseService machineBaseService;
     /**
      * todo
      * 1. temp register
@@ -24,6 +31,79 @@ public class MachineService {
     public Machine find_machine_data_service(String machineId){
         return  machineRepository.findById(machineId);
     }
+
+    public boolean check_machine_id(String machineId){
+        return machineRepository.existsById(machineId);
+    }
+
+    public boolean check_machine_line_service(String machineId , int lineCount){
+       Machine machine =  machineRepository.findById(machineId);
+       log.info("machine line check start");
+       if(! (machine.getLine() < lineCount)){
+           return true;
+       }else{
+           log.warn("line check!");
+           return false;
+       }
+    }
+    public String machine_data_reUpload_service(Machine machine , List<Base> baseList){
+        log.info("machine data reUpload -> db start");
+        machineBaseService.delete_machineBase_service(machine.getId());
+        log.info("머신 데이터 삭제처리가 완료되었습니다. 다음스텝...");
+
+        String return_text = machine_data_upload_service(machine , baseList);
+        return return_text;
+    }
+
+
+    public String machine_data_upload_service(Machine machine , List<Base> baseList){
+        log.info("machine data upload -> db start");
+        String return_text;
+        int checkFlag = baseList.size();
+
+        for(Base base : baseList) {
+            try {
+                machineBaseRepository.save(
+                        MachineBase.builder()
+                                .machine(machine)
+                                .base(base)
+                                .build()
+                );
+                log.info("정상등록성공 ... 계속됩니다.");
+                checkFlag--;
+            } catch (DataIntegrityViolationException e) {
+                // 데이터베이스 무결성 제약 조건 위반 - 키 중복  or 조건 위배
+                return_text = "사용자의 데이터 제대로 검증되지 않았습니다.";
+                log.warn("admin_register_service : {}", return_text);
+            } catch (JpaSystemException e) {
+                // JPA 연동 중 문제 발생
+                return_text = "데이터베이스 연동 중 오류가 발생";
+                log.warn("admin_register_service : {}", return_text);
+            } catch (DataAccessException e) {
+                // 데이터 액세스 오류
+                return_text = "데이터베이스 액세스 중 오류가 발생";
+                log.warn("admin_register_service : {}", return_text);
+            } catch (Exception e) {
+                // 다른 모든 예외 처리
+                return_text = "알 수 없는 오류가 발생";
+                log.warn(e.getMessage());
+
+            }
+
+        }
+        log.info("등록이 완료되었습니다.");
+        if(checkFlag ==0){
+            return_text = "success";
+        }else{
+            log.warn("등록중오류가 발생하였습니다.");
+            return_text = "fail";
+            /**
+             * 기능 구현 완료 후 삭제-> 재시도 로직 추가하기
+             */
+        }
+        return return_text;
+    }
+
     public String machine_login_service(MachineLoginDTO machineLoginDTO){
         String return_text;
 

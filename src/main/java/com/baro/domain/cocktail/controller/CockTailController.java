@@ -4,8 +4,10 @@ import com.baro.domain.cocktail.domain.Base;
 import com.baro.domain.cocktail.domain.Cocktail;
 import com.baro.domain.cocktail.repository.DAO.CocktailDAO;
 import com.baro.domain.cocktail.repository.DAO.ListCockTailDAO;
+import com.baro.domain.cocktail.repository.DAO.RecipeDAO;
 import com.baro.domain.cocktail.repository.DTO.BaseUploadDTO;
 import com.baro.domain.cocktail.repository.DTO.CockTailUploadDTO;
+import com.baro.domain.cocktail.repository.DTO.CocktailDetailsDTO;
 import com.baro.domain.cocktail.service.BaseService;
 import com.baro.domain.cocktail.service.CocktailService;
 import com.baro.domain.cocktail.service.RecipeService;
@@ -47,9 +49,20 @@ public class CockTailController {
     public ResponseEntity cocktail_object_read_controller(@PathVariable Long seq){
        if(cocktailService.checkCocktailToSeq(seq)){
            //존재
+           /**
+            * 1. 칵테일정보
+            * 2. 레시피 리스트
+            */
             CocktailDAO cocktailDAO =
                     cocktailService.cocktail_object_read_service(seq);
-            return ResponseEntity.ok(cocktailDAO);
+
+            List<RecipeDAO> recipeList = recipeService.recipe_read_service(seq);
+
+           CocktailDetailsDTO cocktailDetailsDTO = new CocktailDetailsDTO();
+           cocktailDetailsDTO.setCocktailDetail(cocktailDAO);
+           cocktailDetailsDTO.setRecipeList(recipeList);
+
+           return ResponseEntity.ok(cocktailDetailsDTO);
        }else{
            //존재하지않음
            return  ResponseEntity.status(HttpStatus.NOT_FOUND).body("칵테일 정보를 찾을 수 없습니다.");
@@ -63,7 +76,14 @@ public class CockTailController {
 
             CocktailDAO cocktailDAO =
                     cocktailService.cocktail_object_read_service(seq);
-            return ResponseEntity.ok(cocktailDAO);
+
+            List<RecipeDAO> recipeList = recipeService.recipe_read_service(seq);
+
+            CocktailDetailsDTO cocktailDetailsDTO = new CocktailDetailsDTO();
+            cocktailDetailsDTO.setCocktailDetail(cocktailDAO);
+            cocktailDetailsDTO.setRecipeList(recipeList);
+
+            return ResponseEntity.ok(cocktailDetailsDTO);
         }else{
             //존재하지않음
             return  ResponseEntity.status(HttpStatus.NOT_FOUND).body("칵테일 정보를 찾을 수 없습니다.");

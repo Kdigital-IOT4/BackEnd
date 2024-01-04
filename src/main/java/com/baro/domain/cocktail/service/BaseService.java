@@ -35,6 +35,10 @@ public class BaseService {
        return baseRepository.findByName(base_en_name);
     }
 
+    public Base findBaseToSeq(Long baseSeq){
+        return baseRepository.findBySeq(baseSeq);
+    }
+
     /**
      * 다른곳에도 사용되는 애들
      */

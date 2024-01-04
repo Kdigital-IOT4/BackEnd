@@ -3,7 +3,9 @@ package com.baro.domain.user.controller;
 import com.baro.domain.cocktail.domain.Base;
 import com.baro.domain.cocktail.service.BaseService;
 import com.baro.domain.user.domain.Machine;
+import com.baro.domain.user.repository.DAO.MachineBaseReadDAO;
 import com.baro.domain.user.repository.DTO.Machine.MachineBaseDTO;
+import com.baro.domain.user.repository.DTO.Machine.MachineBaseReadDTO;
 import com.baro.domain.user.repository.DTO.Machine.MachineDataDTO;
 import com.baro.domain.user.repository.DTO.MachineDataUpload;
 import com.baro.domain.user.service.MachineBaseService;
@@ -26,6 +28,20 @@ public class MachineController {
     private final MachineService machineService;
     private final BaseService baseService;
     private final MachineBaseService machineBaseService;
+
+    @GetMapping("/data/read")
+    public ResponseEntity machine_base_data_read_controller(@RequestBody MachineBaseReadDTO baseReadDTO){
+        if(machineService.check_machine_id(baseReadDTO.getMachineId())){
+            //아이디가 존재
+           MachineBaseReadDAO machineBaseList = machineBaseService.read_machine_base_service(baseReadDTO.getMachineId());
+
+           return ResponseEntity.ok(machineBaseList);
+        }else{
+            //아이디가 없음
+            log.warn("존재하지 않은 머신아이디 시도");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("존재하지않는 머신아이디");
+        }
+    }
 
     @PostMapping("/data/upload")
     public ResponseEntity machine_data_upload_controller(@RequestBody MachineDataUpload machineUploadData) {

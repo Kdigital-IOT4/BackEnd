@@ -1,7 +1,11 @@
 package com.baro.domain.user.service;
 
+import com.baro.domain.cocktail.domain.Base;
+import com.baro.domain.cocktail.repository.DAO.BaseDAO;
 import com.baro.domain.user.domain.Machine;
 import com.baro.domain.user.domain.MachineBase;
+import com.baro.domain.user.repository.DAO.MachineBaseReadDAO;
+import com.baro.domain.user.repository.DTO.Machine.MachineBaseReadDTO;
 import com.baro.domain.user.repository.JPAMachineBaseRepository;
 import com.baro.domain.user.repository.JPAMachineRepository;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -49,6 +54,36 @@ public class MachineBaseService {
             return false;
         }
 
+    }
+
+    public MachineBaseReadDAO read_machine_base_service(String machineId) {
+        Machine machine = machineRepository.findById(machineId);
+        List<MachineBase> machineBaseList = machineBaseRepository.findByMachineAndIsDELETED(machine, false);
+
+        List<BaseDAO> baseList = machineBaseList.stream()
+                .map(this::mapToBaseDAO)
+                .collect(Collectors.toList());
+
+        MachineBaseReadDAO machineBaseReadDAO = new MachineBaseReadDAO();
+        machineBaseReadDAO.setMachineId(machineId);
+        machineBaseReadDAO.setBaseList(baseList);
+
+        return machineBaseReadDAO;
+    }
+
+    private BaseDAO mapToBaseDAO(MachineBase machineBase) {
+        BaseDAO baseDAO = new BaseDAO();
+        Base base = machineBase.getBase();
+
+        baseDAO.setEN_Name(base.getName());
+        baseDAO.setKR_Name(base.getKrName());
+        baseDAO.setPrice(base.getPrice());
+        baseDAO.setAmount(base.getAmount());
+        baseDAO.setAlcohol(base.getAlcohol());
+        baseDAO.setContent(base.getContentL());
+        baseDAO.setImgURL(base.getFileURL());
+
+        return baseDAO;
     }
 
 }

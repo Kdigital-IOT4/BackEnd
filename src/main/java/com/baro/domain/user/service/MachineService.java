@@ -22,6 +22,7 @@ import java.util.List;
 public class MachineService {
     private final JPAMachineRepository machineRepository;
     private final JPAMachineBaseRepository machineBaseRepository;
+    private final MachineBaseService machineBaseService;
     /**
      * todo
      * 1. temp register
@@ -34,6 +35,26 @@ public class MachineService {
     public boolean check_machine_id(String machineId){
         return machineRepository.existsById(machineId);
     }
+
+    public boolean check_machine_line_service(String machineId , int lineCount){
+       Machine machine =  machineRepository.findById(machineId);
+       log.info("machine line check start");
+       if(! (machine.getLine() < lineCount)){
+           return true;
+       }else{
+           log.warn("line check!");
+           return false;
+       }
+    }
+    public String machine_data_reUpload_service(Machine machine , List<Base> baseList){
+        log.info("machine data reUpload -> db start");
+        machineBaseService.delete_machineBase_service(machine.getId());
+        log.info("머신 데이터 삭제처리가 완료되었습니다. 다음스텝...");
+
+        String return_text = machine_data_upload_service(machine , baseList);
+        return return_text;
+    }
+
 
     public String machine_data_upload_service(Machine machine , List<Base> baseList){
         log.info("machine data upload -> db start");

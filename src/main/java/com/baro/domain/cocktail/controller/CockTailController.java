@@ -2,6 +2,8 @@ package com.baro.domain.cocktail.controller;
 
 import com.baro.domain.cocktail.domain.Base;
 import com.baro.domain.cocktail.domain.Cocktail;
+import com.baro.domain.cocktail.repository.DAO.CocktailDAO;
+import com.baro.domain.cocktail.repository.DAO.ListCockTailDAO;
 import com.baro.domain.cocktail.repository.DTO.BaseUploadDTO;
 import com.baro.domain.cocktail.repository.DTO.CockTailUploadDTO;
 import com.baro.domain.cocktail.service.BaseService;
@@ -29,8 +31,47 @@ public class CockTailController {
     private final CocktailService cocktailService;
     private final RecipeService recipeService;
 
+    @GetMapping("/listCocktail")
+    public ResponseEntity cocktail_list_read_controller(){
+        List<ListCockTailDAO> cocktailList = cocktailService.cocktail_list_read_service();
+
+        if(cocktailList.isEmpty()){
+            log.warn("칵테일 정보를 찾을 수 없습니다.");
+            return  ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("칵테일 정보를 찾을 수 없습니다.");
+        }else{
+            return ResponseEntity.ok(cocktailList);
+        }
+    }
+
+    @GetMapping("/{seq}")
+    public ResponseEntity cocktail_object_read_controller(@PathVariable Long seq){
+       if(cocktailService.checkCocktailToSeq(seq)){
+           //존재
+            CocktailDAO cocktailDAO =
+                    cocktailService.cocktail_object_read_service(seq);
+            return ResponseEntity.ok(cocktailDAO);
+       }else{
+           //존재하지않음
+           return  ResponseEntity.status(HttpStatus.NOT_FOUND).body("칵테일 정보를 찾을 수 없습니다.");
+       }
+    }
+
+    @GetMapping("/data/{en_name}")
+    public ResponseEntity cocktail_object_name_read_controller(@PathVariable String en_name){
+        if(cocktailService.checkCocktailToName(en_name)){
+            Long seq = cocktailService.findCocktailSeqTOName(en_name);
+
+            CocktailDAO cocktailDAO =
+                    cocktailService.cocktail_object_read_service(seq);
+            return ResponseEntity.ok(cocktailDAO);
+        }else{
+            //존재하지않음
+            return  ResponseEntity.status(HttpStatus.NOT_FOUND).body("칵테일 정보를 찾을 수 없습니다.");
+        }
+    }
+
     @PostMapping("/upload")
-    public ResponseEntity base_upload_controller(@RequestParam("image") MultipartFile image,
+    public ResponseEntity cocktail_upload_controller(@RequestParam("image") MultipartFile image,
                                                  @ModelAttribute CockTailUploadDTO cockTailUploadDTO , @RequestParam("baseList") List<String> baseList){
         String return_text;
 

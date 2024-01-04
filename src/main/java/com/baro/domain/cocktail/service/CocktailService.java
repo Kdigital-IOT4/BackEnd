@@ -1,6 +1,8 @@
 package com.baro.domain.cocktail.service;
 
 import com.baro.domain.cocktail.domain.Cocktail;
+import com.baro.domain.cocktail.repository.DAO.CocktailDAO;
+import com.baro.domain.cocktail.repository.DAO.ListCockTailDAO;
 import com.baro.domain.cocktail.repository.DTO.CockTailUploadDTO;
 import com.baro.domain.cocktail.repository.JPACockTailRepository;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +12,10 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -18,6 +24,57 @@ public class CocktailService {
 
     public boolean checkCocktailToName(String en_name){
         return cockTailRepository.existsByName(en_name);
+    }
+    public Long findCocktailSeqTOName(String en_name){
+        Cocktail cocktail = cockTailRepository.findByName(en_name);
+        return cocktail.getSeq();
+    }
+    public boolean checkCocktailToSeq(Long seq){
+        return cockTailRepository.existsBySeq(seq);
+    }
+
+    public CocktailDAO cocktail_object_read_service(Long seq){
+        try {
+            Cocktail cocktailData = cockTailRepository.findBySeq(seq);
+            CocktailDAO cocktailDAO = convertToCocktail(cocktailData);
+            return cocktailDAO;
+        }catch (Exception e){
+            log.warn("칵테일 정보를 불러오는데 문제가 발생하였습니다. \n{}",e);
+            return null;
+        }
+    }
+    public List<ListCockTailDAO> cocktail_list_read_service(){
+        try {
+            List<Cocktail> cocktailList = cockTailRepository.findAll();
+            List<ListCockTailDAO> cockTailDAOList = cocktailList.stream()
+                    .map(this::convertToListCockTail)
+                    .collect(Collectors.toList());
+
+            return cockTailDAOList;
+        }catch (Exception e){
+            log.warn("칵테일 정보를 가져오는 중 문재가 발생\n{}",e);
+            return null;
+        }
+    }
+    private CocktailDAO convertToCocktail(Cocktail cocktailData){
+        CocktailDAO cocktailDAO = new CocktailDAO();
+        cocktailDAO.setEN_Name(cocktailData.getName());
+        cocktailDAO.setKR_Name(cocktailData.getKrName());
+        cocktailDAO.setPrice(cocktailData.getPrice());
+        cocktailDAO.setAmount(cocktailData.getAmount());
+        cocktailDAO.setAlcohol(cocktailData.getAlcohol());
+        cocktailDAO.setContent(cocktailData.getContent());
+        cocktailDAO.setImgURL(cocktailData.getFileURL());
+
+        return cocktailDAO;
+    }
+    private ListCockTailDAO convertToListCockTail(Cocktail cocktailData){
+        ListCockTailDAO listCockTailDAO = new ListCockTailDAO();
+        listCockTailDAO.setSeq(cocktailData.getSeq());
+        listCockTailDAO.setKR_Name(cocktailData.getKrName());
+        listCockTailDAO.setEN_Name(cocktailData.getName());
+        listCockTailDAO.setFileURL(cocktailData.getFileURL());
+        return listCockTailDAO;
     }
 
     public Cocktail cocktail_upload_service(String imgURL, CockTailUploadDTO cockTailUploadDTO){

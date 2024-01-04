@@ -25,14 +25,18 @@ public class CocktailService {
     public boolean checkCocktailToName(String en_name){
         return cockTailRepository.existsByName(en_name);
     }
-    public Long findCocktailSeqTOName(String en_name){
-        Cocktail cocktail = cockTailRepository.findByName(en_name);
-        return cocktail.getSeq();
-    }
     public boolean checkCocktailToSeq(Long seq){
         return cockTailRepository.existsBySeq(seq);
     }
 
+    public Long findCocktailSeqTOName(String en_name){
+        Cocktail cocktail = cockTailRepository.findByName(en_name);
+        return cocktail.getSeq();
+    }
+    public Cocktail findCocktailToSeq(Long cocktailSeq){
+        Cocktail cocktail =cockTailRepository.findBySeq(cocktailSeq);
+        return cocktail;
+    }
     public CocktailDAO cocktail_object_read_service(Long seq){
         try {
             Cocktail cocktailData = cockTailRepository.findBySeq(seq);

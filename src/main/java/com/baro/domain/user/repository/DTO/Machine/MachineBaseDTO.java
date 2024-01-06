@@ -9,4 +9,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class MachineBaseDTO {
     private Long base_seq;
+
+    private int machine_base_line;
 }

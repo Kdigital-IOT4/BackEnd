@@ -1,8 +1,11 @@
 package com.baro.domain.user.service;
 
 import com.baro.domain.cocktail.domain.Base;
+import com.baro.domain.cocktail.repository.DAO.BaseMachineUploadDAO;
+import com.baro.domain.cocktail.service.BaseService;
 import com.baro.domain.user.domain.Machine;
 import com.baro.domain.user.domain.MachineBase;
+import com.baro.domain.user.repository.DTO.Machine.MachineBaseDTO;
 import com.baro.domain.user.repository.DTO.MachineLoginDTO;
 import com.baro.domain.user.repository.DTO.MachineRegisterDTO;
 import com.baro.domain.user.repository.JPAMachineBaseRepository;
@@ -14,6 +17,7 @@ import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
 import org.springframework.dao.DataAccessException;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -23,6 +27,8 @@ public class MachineService {
     private final JPAMachineRepository machineRepository;
     private final JPAMachineBaseRepository machineBaseRepository;
     private final MachineBaseService machineBaseService;
+
+    private final BaseService baseService;
     /**
      * todo
      * 1. temp register
@@ -46,27 +52,35 @@ public class MachineService {
            return false;
        }
     }
-    public String machine_data_reUpload_service(Machine machine , List<Base> baseList){
+    public String machine_data_reUpload_service(Machine machine , List<MachineBaseDTO> machineBaseList){
         log.info("machine data reUpload -> db start");
         machineBaseService.delete_machineBase_service(machine.getId());
         log.info("머신 데이터 삭제처리가 완료되었습니다. 다음스텝...");
 
-        String return_text = machine_data_upload_service(machine , baseList);
+        String return_text = machine_data_upload_service(machine , machineBaseList);
         return return_text;
     }
 
 
-    public String machine_data_upload_service(Machine machine , List<Base> baseList){
+    public String machine_data_upload_service(Machine machine ,List<MachineBaseDTO> machineBaseList){
         log.info("machine data upload -> db start");
         String return_text;
+        List<BaseMachineUploadDAO> baseList = find_base_Machine_list(machineBaseList);
         int checkFlag = baseList.size();
 
-        for(Base base : baseList) {
+
+        for (MachineBaseDTO machineBaseDTO : machineBaseList){
+            machineBaseDTO.getMachine_base_line();
+        }
+
+
+        for(BaseMachineUploadDAO base : baseList) {
             try {
                 machineBaseRepository.save(
                         MachineBase.builder()
                                 .machine(machine)
-                                .base(base)
+                                .base(base.getBase())
+                                .lineNumber(base.getBase_line())
                                 .build()
                 );
                 log.info("정상등록성공 ... 계속됩니다.");
@@ -174,4 +188,24 @@ public class MachineService {
     }
 
 
+
+    private List<BaseMachineUploadDAO> find_base_Machine_list(List<MachineBaseDTO> machineBaseList) {
+        List<BaseMachineUploadDAO> baseList = new ArrayList<>();
+
+        for (MachineBaseDTO baseData : machineBaseList) {
+            Base base = baseService.findBaseToSeq(baseData.getBase_seq());
+            log.info("add base {}", base.getName());
+
+
+            int lineNum = baseData.getMachine_base_line();
+
+            BaseMachineUploadDAO baseMachineUploadDAO = new BaseMachineUploadDAO();
+            baseMachineUploadDAO.setBase(base);
+            baseMachineUploadDAO.setBase_line(lineNum);
+
+            baseList.add(baseMachineUploadDAO);
+        }
+
+        return baseList;
+    }
 }

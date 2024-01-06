@@ -2,6 +2,7 @@ package com.baro.domain.user.service;
 
 import com.baro.domain.cocktail.domain.Base;
 import com.baro.domain.cocktail.repository.DAO.BaseDAO;
+import com.baro.domain.cocktail.repository.DAO.BaseMachineReadDAO;
 import com.baro.domain.user.domain.Machine;
 import com.baro.domain.user.domain.MachineBase;
 import com.baro.domain.user.repository.DAO.MachineBaseReadDAO;
@@ -60,7 +61,7 @@ public class MachineBaseService {
         Machine machine = machineRepository.findById(machineId);
         List<MachineBase> machineBaseList = machineBaseRepository.findByMachineAndIsDELETED(machine, false);
 
-        List<BaseDAO> baseList = machineBaseList.stream()
+        List<BaseMachineReadDAO> baseList = machineBaseList.stream()
                 .map(this::mapToBaseDAO)
                 .collect(Collectors.toList());
 
@@ -71,10 +72,12 @@ public class MachineBaseService {
         return machineBaseReadDAO;
     }
 
-    private BaseDAO mapToBaseDAO(MachineBase machineBase) {
-        BaseDAO baseDAO = new BaseDAO();
+    private BaseMachineReadDAO mapToBaseDAO(MachineBase machineBase) {
+        BaseMachineReadDAO baseDAO = new BaseMachineReadDAO();
         Base base = machineBase.getBase();
+        int base_line = machineBase.getLineNumber();
 
+        baseDAO.setBase_line(base_line);
         baseDAO.setEN_Name(base.getName());
         baseDAO.setKR_Name(base.getKrName());
         baseDAO.setPrice(base.getPrice());

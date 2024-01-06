@@ -1,4 +1,4 @@
-package com.baro.domain.user.repository.DTO;
+package com.baro.domain.user.repository.DTO.Machine;
 
 import com.baro.domain.user.repository.DTO.Machine.MachineBaseDTO;
 import com.baro.domain.user.repository.DTO.Machine.MachineDataDTO;
@@ -9,7 +9,7 @@ import java.util.List;
 
 @Getter
 @Setter
-public class MachineDataUpload {
+public class MachineDataUploadDTO {
     private MachineDataDTO machineData;
     private List<MachineBaseDTO> machineBaseList;
 }

@@ -6,8 +6,7 @@ import com.baro.domain.user.domain.Machine;
 import com.baro.domain.user.repository.DAO.MachineBaseReadDAO;
 import com.baro.domain.user.repository.DTO.Machine.MachineBaseDTO;
 import com.baro.domain.user.repository.DTO.Machine.MachineBaseReadDTO;
-import com.baro.domain.user.repository.DTO.Machine.MachineDataDTO;
-import com.baro.domain.user.repository.DTO.MachineDataUpload;
+import com.baro.domain.user.repository.DTO.Machine.MachineDataUploadDTO;
 import com.baro.domain.user.service.MachineBaseService;
 import com.baro.domain.user.service.MachineService;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +16,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Slf4j
 @RestController
@@ -44,7 +45,7 @@ public class MachineController {
     }
 
     @PostMapping("/data/upload")
-    public ResponseEntity machine_data_upload_controller(@RequestBody MachineDataUpload machineUploadData) {
+    public ResponseEntity machine_data_upload_controller(@RequestBody MachineDataUploadDTO machineUploadData) {
         String machineId = machineUploadData.getMachineData().getMachineId();
 
         log.info("머신 베이스 등록 시작 ... {}",  machineId);
@@ -59,6 +60,11 @@ public class MachineController {
                     .body("베이스 정보가 존재하지 않습니다. 관리자에게 문의하세요.");
         }
 
+        if(!check_machine_base_line_number(machineUploadData.getMachineBaseList())){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("베이스 리스트 조작이 잘못되었습니다. 관리자에게 문의하세요");
+        }
+
 
         if(!machineService.check_machine_line_service(machineId , machineUploadData.getMachineBaseList().size())){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -71,16 +77,15 @@ public class MachineController {
              * 라인이상으로 입력되면 거부하는 기능 check
              */
             Machine machine = machineService.find_machine_data_service(machineId);
-            List<Base> baseList = find_base_list(machineUploadData.getMachineBaseList());
             String machine_return_text;
             if(machineBaseService.already_exists_machineBase_check_service(machineId)){
                 //존재하는 머신베이스
                 log.info("이미 존재하는 머신베이스에 재업로드를 시작합니다.");
-                machine_return_text = machineService.machine_data_reUpload_service(machine , baseList);
+                machine_return_text = machineService.machine_data_reUpload_service(machine , machineUploadData.getMachineBaseList());
             }else{
                 //존재하지 않음
                 log.info("존재하지않은 기계 등록을 시작합니다.");
-                machine_return_text = machineService.machine_data_upload_service(machine, baseList);
+                machine_return_text = machineService.machine_data_upload_service(machine, machineUploadData.getMachineBaseList());
             }
 
 
@@ -95,6 +100,23 @@ public class MachineController {
             log.error("머신 데이터 업로드 중 오류 발생", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("서버 오류 발생. 관리자에게 문의하세요.");
         }
+    }
+
+    private boolean check_machine_base_line_number(List<MachineBaseDTO> machineBaseList){
+        log.info("check_machine_base_line_number start");
+        int checkFlag = machineBaseList.size();
+        Set<Integer> uniqueLineNumbers = new HashSet<>();
+
+        for (MachineBaseDTO machineBaseData : machineBaseList) {
+            Integer baseLineNum = machineBaseData.getMachine_base_line();
+
+            if (baseLineNum == null ||baseLineNum < 1 || baseLineNum > checkFlag || !uniqueLineNumbers.add(baseLineNum)) {
+                log.error("Invalid or duplicate baseLineNum found: " + baseLineNum);
+                return false;
+            }
+        }
+        return true;
+
     }
 
     private boolean check_base_list(List<MachineBaseDTO> machineBaseList){
@@ -121,15 +143,4 @@ public class MachineController {
 
     }
 
-    private List<Base> find_base_list(List<MachineBaseDTO> machineBaseList) {
-        List<Base> baseList = new ArrayList<>();
-
-        for (MachineBaseDTO baseData : machineBaseList) {
-            Base base = baseService.findBaseToSeq(baseData.getBase_seq());
-            log.info("add base {}", base.getName());
-            baseList.add(base);
-        }
-
-        return baseList;
-    }
 }

@@ -29,6 +29,9 @@ public class MachineBase {
     @ManyToOne
     @JoinColumn(name = "BASE_SEQ", nullable = false)
     private Base base;
+    @Column(name = "LINE_NUMBER" , nullable = false)
+    private int lineNumber;
+
     @Column(name = "IS_CREATED" , nullable = false)
     @CreationTimestamp
     private LocalDateTime isCreated;

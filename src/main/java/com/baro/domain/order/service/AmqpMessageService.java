@@ -1,6 +1,7 @@
 package com.baro.domain.order.service;
 
 import com.baro.domain.order.repository.DTO.MessageDTO;
+import com.baro.domain.order.repository.DTO.OrderStoreDataDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -21,24 +22,16 @@ public class AmqpMessageService {
 
     private final RabbitTemplate rabbitTemplate;
 
-    /**
-     * Queue로 메시지를 발행
-     *
-     * @param messageDto 발행할 메시지의 DTO 객체
-     */
-    public void sendMessage(MessageDTO messageDto) {
-        log.info("message sent: {}", messageDto.toString());
-        rabbitTemplate.convertAndSend(exchangeName, routingKey, messageDto);
+    public String sendOrderCode(OrderStoreDataDTO orderStoreDataDTO){
+        log.info("rabbitMQ : send Code -> {}",orderStoreDataDTO.getOrderCode());
+        rabbitTemplate.convertAndSend(exchangeName , routingKey , orderStoreDataDTO);
+        return "success";
     }
 
-    /**
-     * Queue에서 메시지를 구독
-     *
-     * @param messageDto 구독한 메시지를 담고 있는 MessageDto 객체
-     */
     @RabbitListener(queues = "${rabbitmq.queue.name}")
-    public void reciveMessage(MessageDTO messageDto) {
-        log.info("Received message: {}", messageDto.toString());
+    public void reciveMessage(OrderStoreDataDTO orderStoreDataDTO) {
+        log.info("Received message: {}", orderStoreDataDTO.getOrderCode());
     }
+
 
 }

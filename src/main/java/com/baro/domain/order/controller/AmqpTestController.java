@@ -22,9 +22,9 @@ public class AmqpTestController {
      * @param messageDto 발행할 메시지의 DTO 객체
      * @return ResponseEntity 객체로 응답을 반환
      */
-    @RequestMapping(value = "/send/message", method = RequestMethod.POST)
-    public ResponseEntity<?> sendMessage(@RequestBody MessageDTO messageDto) {
-        messageService.sendMessage(messageDto);
-        return ResponseEntity.ok("Message sent to RabbitMQ!");
-    }
+//    @RequestMapping(value = "/send/message", method = RequestMethod.POST)
+//    public ResponseEntity<?> sendMessage(@RequestBody MessageDTO messageDto) {
+//        messageService.sendMessage(messageDto);
+//        return ResponseEntity.ok("Message sent to RabbitMQ!");
+//    }
 }

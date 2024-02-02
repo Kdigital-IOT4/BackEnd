@@ -5,10 +5,12 @@ import com.baro.domain.cocktail.repository.DAO.RecipeDAO;
 import com.baro.domain.cocktail.service.BaseService;
 import com.baro.domain.cocktail.service.CocktailService;
 import com.baro.domain.cocktail.service.RecipeService;
+import com.baro.domain.order.domain.Order;
 import com.baro.domain.order.repository.DAO.OrderCocktailDAO;
 import com.baro.domain.order.repository.DAO.OrderCocktailDetailDAO;
 import com.baro.domain.order.repository.DTO.OrderStoreDataDTO;
 import com.baro.domain.order.repository.DTO.OrderStoreDataRecipeDTO;
+import com.baro.domain.order.repository.JPAMongoOrderRepository;
 import com.baro.domain.order.util.GenerateOrderCodeUtil;
 import com.baro.domain.user.service.MachineService;
 import lombok.RequiredArgsConstructor;
@@ -28,15 +30,16 @@ public class OrderService {
     private final GenerateOrderCodeUtil generateOrderCodeUtil;
     private final CocktailService cocktailService;
     private final RecipeService recipeService;
+    private final JPAMongoOrderRepository mongoOrderRepository;
 
-    public String order_cocktail_service(OrderCocktailDAO orderData){
+    public OrderStoreDataDTO order_cocktail_service(OrderCocktailDAO orderData){
         String userPhoneNumber = orderData.getPhoneNumber();
         String machineId = orderData.getMachineId();
 
         //check machineId;
         if(! machineService.check_machine_id(machineId)){
             log.warn("machineId fail");
-            return "machineId fail";
+            return null;
         }
         /**
          *     private String orderCode;x
@@ -51,7 +54,7 @@ public class OrderService {
         String orderCode = generateOrderCodeUtil.generateRandomString();
         log.info("add orderCode : {}",orderCode);
 
-        // *     private String orderCode ,machine_id ,user_phoneNumber;
+        // *private String orderCode ,machine_id ,user_phoneNumber;
         orderStoreData.setOrderCode(orderCode);
         orderStoreData.setMachine_id(machineId);
         orderStoreData.setUser_phoneNumber(userPhoneNumber);
@@ -65,7 +68,15 @@ public class OrderService {
         int total_price = order_totalPrice_calc_service(recipeList);
         orderStoreData.setTotal_price(total_price);
 
-        return null;
+        // mongo register
+        String return_text = order_save_service(orderStoreData);
+        if(return_text.equals("success")){
+            log.info("정상적인 업로드요청이 완료");
+            return orderStoreData;
+        }else{
+            log.info("비정상적인 업로드요청");
+            return null;
+        }
     }
     private List<OrderStoreDataRecipeDTO> order_cocktail_detail_service(List<OrderCocktailDetailDAO> cocktailList) {
         List<OrderStoreDataRecipeDTO> orderDataList = new ArrayList<>();
@@ -97,6 +108,26 @@ public class OrderService {
         }
 
         return total_price;
+    }
+
+    private String order_save_service(OrderStoreDataDTO orderStoreData ){
+        //order 객체 생성
+        Order order = new Order();
+        order.setOrderCode(orderStoreData.getOrderCode());
+        order.setMachine_id(orderStoreData.getMachine_id());
+        order.setUser_phoneNumber(orderStoreData.getUser_phoneNumber());
+        order.setCreateOrderTime(orderStoreData.getCreateOrderTime());
+        order.setTotal_price(orderStoreData.getTotal_price());
+        order.setRecipeList(orderStoreData.getRecipeList());
+        // register order Bils
+        try{
+            mongoOrderRepository.save(order);
+            return "success";
+        }catch (Exception e) {
+            log.warn("mongo order upload fail -->\n{}",e);
+            return "fail";
+        }
+
     }
 
 }

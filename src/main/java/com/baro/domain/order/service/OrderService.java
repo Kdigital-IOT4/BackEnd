@@ -31,7 +31,7 @@ public class OrderService {
     private final CocktailService cocktailService;
     private final RecipeService recipeService;
     private final JPAMongoOrderRepository mongoOrderRepository;
-
+    private final CocktailQueueService cocktailQueueService;
     public OrderStoreDataDTO order_cocktail_service(OrderCocktailDAO orderData){
         String userPhoneNumber = orderData.getPhoneNumber();
         String machineId = orderData.getMachineId();
@@ -72,7 +72,21 @@ public class OrderService {
         String return_text = order_save_service(orderStoreData);
         if(return_text.equals("success")){
             log.info("정상적인 업로드요청이 완료");
-            return orderStoreData;
+            /**
+             * start queue register
+             */
+            log.info("queue 등록을 시작합니다.");
+            String queue_upload_text = cocktailQueueService.register_cocktailQueue_service(machineId , orderCode);
+            if(queue_upload_text.equals("success")){
+                //큐등록성공
+                log.info("큐 등록성공");
+                return orderStoreData;
+            }else{
+                //실패
+                log.info("큐 등록실패");
+                return null;
+            }
+
         }else{
             log.info("비정상적인 업로드요청");
             return null;
@@ -114,10 +128,10 @@ public class OrderService {
         //order 객체 생성
         Order order = new Order();
         order.setOrderCode(orderStoreData.getOrderCode());
-        order.setMachine_id(orderStoreData.getMachine_id());
-        order.setUser_phoneNumber(orderStoreData.getUser_phoneNumber());
+        order.setMachineId(orderStoreData.getMachine_id());
+        order.setUserPhoneNumber(orderStoreData.getUser_phoneNumber());
         order.setCreateOrderTime(orderStoreData.getCreateOrderTime());
-        order.setTotal_price(orderStoreData.getTotal_price());
+        order.setTotalPrice(orderStoreData.getTotal_price());
         order.setRecipeList(orderStoreData.getRecipeList());
         // register order Bils
         try{

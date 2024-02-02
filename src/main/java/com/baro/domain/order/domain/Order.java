@@ -18,9 +18,9 @@ public class Order {
 
     @Id
     private String orderCode;
-    private String machine_id;
-    private String user_phoneNumber;
-    private int total_price;
+    private String machineId;
+    private String userPhoneNumber;
+    private int totalPrice;
     private LocalDateTime createOrderTime;
     private List<OrderStoreDataRecipeDTO> recipeList;
 }

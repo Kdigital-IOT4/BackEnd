@@ -2,16 +2,17 @@ package com.baro.domain.order.service;
 
 import com.baro.domain.cocktail.domain.Cocktail;
 import com.baro.domain.cocktail.repository.DAO.RecipeDAO;
-import com.baro.domain.cocktail.service.BaseService;
 import com.baro.domain.cocktail.service.CocktailService;
 import com.baro.domain.cocktail.service.RecipeService;
 import com.baro.domain.order.domain.Order;
-import com.baro.domain.order.repository.DAO.OrderCocktailDAO;
-import com.baro.domain.order.repository.DAO.OrderCocktailDetailDAO;
+import com.baro.domain.order.repository.DTO.OrderCocktailDTO;
+import com.baro.domain.order.repository.DTO.OrderCocktailDetailDTO;
 import com.baro.domain.order.repository.DTO.OrderStoreDataDTO;
 import com.baro.domain.order.repository.DTO.OrderStoreDataRecipeDTO;
 import com.baro.domain.order.repository.JPAMongoOrderRepository;
 import com.baro.domain.order.util.GenerateOrderCodeUtil;
+import com.baro.domain.user.repository.DAO.MachineBaseReadDAO;
+import com.baro.domain.user.service.MachineBaseService;
 import com.baro.domain.user.service.MachineService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -32,7 +34,37 @@ public class OrderService {
     private final RecipeService recipeService;
     private final JPAMongoOrderRepository mongoOrderRepository;
     private final CocktailQueueService cocktailQueueService;
-    public OrderStoreDataDTO order_cocktail_service(OrderCocktailDAO orderData){
+    private final MachineBaseService machineBaseService;
+    public boolean orderCode_check_service(String orderCode){
+        //order code exists checking service
+
+        if(mongoOrderRepository.existsByOrderCode(orderCode)){
+            log.info("order Code check completed");
+            return true;
+        }else{
+            log.warn("not exists orderCode -> please check connected");
+            return false;
+        }
+    }
+    public String order_machine_base_find_service(Order order){
+        String machine_id = order.getMachineId();
+        MachineBaseReadDAO machineBase = machineBaseService.read_machine_base_service(machine_id);
+        List<OrderStoreDataRecipeDTO> rootRecipeList = order.getRecipeList();
+        for(OrderStoreDataRecipeDTO item : rootRecipeList ) {
+            List<RecipeDAO> recipeList =item.getBaseList();
+            for(RecipeDAO detail_item : recipeList){
+                detail_item.getBase_seq();
+            }
+        }
+        return null;
+    }
+    public Optional<Order> order_data_find_service(String orderCode){
+       Optional<Order> order = mongoOrderRepository.findByOrderCode(orderCode);
+
+       return order;
+    }
+
+    public OrderStoreDataDTO order_cocktail_service(OrderCocktailDTO orderData){
         String userPhoneNumber = orderData.getPhoneNumber();
         String machineId = orderData.getMachineId();
 
@@ -92,10 +124,10 @@ public class OrderService {
             return null;
         }
     }
-    private List<OrderStoreDataRecipeDTO> order_cocktail_detail_service(List<OrderCocktailDetailDAO> cocktailList) {
+    private List<OrderStoreDataRecipeDTO> order_cocktail_detail_service(List<OrderCocktailDetailDTO> cocktailList) {
         List<OrderStoreDataRecipeDTO> orderDataList = new ArrayList<>();
 
-        for (OrderCocktailDetailDAO item : cocktailList) {
+        for (OrderCocktailDetailDTO item : cocktailList) {
             Long cocktailSeq = item.getCocktailSeq();
             Cocktail cocktail = cocktailService.findCocktailToSeq(cocktailSeq);
             String cocktail_en_name = cocktail.getName();

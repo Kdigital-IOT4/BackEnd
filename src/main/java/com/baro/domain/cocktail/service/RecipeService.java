@@ -36,6 +36,7 @@ public class RecipeService {
         RecipeDAO recipeDAO = new RecipeDAO();
 
         Base base = recipe.getBase();
+        recipeDAO.setBase_seq(base.getSeq());
         recipeDAO.setBase_en_name(base.getName());
         recipeDAO.setBase_kr_name(base.getKrName());
         /**

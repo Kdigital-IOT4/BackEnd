@@ -7,7 +7,7 @@ import lombok.Setter;
 @Setter
 public class BaseMachineReadDAO {
     private int base_line;
-
+    private Long base_seq;
     private String EN_Name;
     private String KR_Name;
     private int price;

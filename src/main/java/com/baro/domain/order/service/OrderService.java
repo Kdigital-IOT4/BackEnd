@@ -1,6 +1,7 @@
 package com.baro.domain.order.service;
 
 import com.baro.domain.cocktail.domain.Cocktail;
+import com.baro.domain.cocktail.repository.DAO.BaseMachineReadDAO;
 import com.baro.domain.cocktail.repository.DAO.RecipeDAO;
 import com.baro.domain.cocktail.service.CocktailService;
 import com.baro.domain.cocktail.service.RecipeService;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Slf4j
@@ -46,17 +48,41 @@ public class OrderService {
             return false;
         }
     }
-    public String order_machine_base_find_service(Order order){
-        String machine_id = order.getMachineId();
-        MachineBaseReadDAO machineBase = machineBaseService.read_machine_base_service(machine_id);
+    public String order_machine_base_find_service(Order order) {
+        List<Integer> baseLineList = new ArrayList<>();
+
+        String machineId = order.getMachineId();
+        MachineBaseReadDAO machineBase = machineBaseService.read_machine_base_service(machineId);
+        List<BaseMachineReadDAO> machineBaseList = machineBase.getBaseList();
+
         List<OrderStoreDataRecipeDTO> rootRecipeList = order.getRecipeList();
-        for(OrderStoreDataRecipeDTO item : rootRecipeList ) {
-            List<RecipeDAO> recipeList =item.getBaseList();
-            for(RecipeDAO detail_item : recipeList){
-                detail_item.getBase_seq();
+        for (OrderStoreDataRecipeDTO item : rootRecipeList) {
+            List<RecipeDAO> recipeList = item.getBaseList();
+            for (RecipeDAO detailItem : recipeList) {
+                Long orderDataBaseSeq = detailItem.getBase_seq();
+
+                boolean baseFound = false;
+                for (BaseMachineReadDAO machineItem : machineBaseList) {
+                    Long machineDataBaseSeq = machineItem.getBase_seq();
+
+                    if (machineDataBaseSeq.equals(orderDataBaseSeq)) {
+                        log.info("Found base!");
+                        int baseLine = machineItem.getBase_line();
+                        baseLineList.add(baseLine);
+                        baseFound = true;
+                        break;  // 찾았으면 내부 루프를 종료
+                    }
+                }
+
+                if (!baseFound) {
+                    // 해당하는 base를 찾지 못했을 때 예외를 던짐
+                    throw new NoSuchElementException("Base not found for order_data_baseSeq: " + orderDataBaseSeq);
+                }
             }
         }
-        return null;
+
+        // 나머지 로직 작성하기 ... ?
+        return "success";
     }
     public Optional<Order> order_data_find_service(String orderCode){
        Optional<Order> order = mongoOrderRepository.findByOrderCode(orderCode);

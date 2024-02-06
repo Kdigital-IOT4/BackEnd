@@ -1,4 +1,4 @@
-package com.baro.domain.order.repository.DAO;
+package com.baro.domain.order.repository.DTO;
 
 import lombok.*;
 
@@ -7,6 +7,6 @@ import lombok.*;
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
-public class OrderCocktailDetailDAO {
+public class OrderCocktailDetailDTO {
     private Long cocktailSeq;
 }

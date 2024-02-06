@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 @Setter
 @Slf4j
 public class RecipeDAO {
+    private Long base_seq;
     private String base_en_name;
     private String base_kr_name;
     private int amount;

@@ -1,4 +1,4 @@
-package com.baro.domain.order.repository.DAO;
+package com.baro.domain.order.repository.DTO;
 
 import lombok.*;
 
@@ -9,10 +9,10 @@ import java.util.List;
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
-public class OrderCocktailDAO {
+public class OrderCocktailDTO {
     private String phoneNumber;
     private String machineId;
-    private List<OrderCocktailDetailDAO> cocktailList;
+    private List<OrderCocktailDetailDTO> cocktailList;
 
 
 }

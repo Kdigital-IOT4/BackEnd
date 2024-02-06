@@ -76,8 +76,9 @@ public class MachineBaseService {
         BaseMachineReadDAO baseDAO = new BaseMachineReadDAO();
         Base base = machineBase.getBase();
         int base_line = machineBase.getLineNumber();
-
         baseDAO.setBase_line(base_line);
+
+        baseDAO.setBase_seq(base.getSeq());
         baseDAO.setEN_Name(base.getName());
         baseDAO.setKR_Name(base.getKrName());
         baseDAO.setPrice(base.getPrice());

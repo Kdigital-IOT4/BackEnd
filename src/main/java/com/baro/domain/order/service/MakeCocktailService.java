@@ -7,6 +7,7 @@ import com.baro.domain.cocktail.service.RecipeService;
 import com.baro.domain.order.domain.Order;
 import com.baro.domain.order.repository.DTO.OrderStoreDataRecipeDTO;
 import com.baro.domain.order.repository.JPAMongoOrderRepository;
+import com.baro.domain.order.repository.enumeration.OrderStatus;
 import com.baro.domain.order.util.GcodeMoveCoordinateData;
 import com.baro.domain.order.util.GcodeMoveSpeedData;
 import com.baro.domain.order.util.GenerateOrderCodeUtil;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -35,7 +37,24 @@ public class MakeCocktailService {
     private final CocktailQueueService cocktailQueueService;
     private final MachineBaseService machineBaseService;
 
+    public boolean order_make_cocktail_inProgress(String orderCode) {
+        // 주문 코드로 주문을 찾기
+        Optional<Order> optionalOrder = mongoOrderRepository.findByOrderCode(orderCode);
 
+        if (optionalOrder.isPresent()) {
+            // Optional에서 Order 객체를 얻어와서 주문 상태를 업데이트
+            Order order = optionalOrder.get();
+            order.setStatus(OrderStatus.IN_PROGRESS);
+
+            // MongoDB에 업데이트된 주문 저장
+            mongoOrderRepository.save(order);
+
+            return true; // 업데이트 성공
+        } else {
+            return false; // 주문이 없거나 업데이트 실패
+        }
+
+    }
     public StringBuilder order_make_cocktail_service(Order order , String speed){
         /**
          * 1. machine 에 대한 base 찾기 -> 순서도 받음

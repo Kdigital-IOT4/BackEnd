@@ -11,6 +11,7 @@ import com.baro.domain.order.repository.DTO.OrderCocktailDetailDTO;
 import com.baro.domain.order.repository.DTO.OrderStoreDataDTO;
 import com.baro.domain.order.repository.DTO.OrderStoreDataRecipeDTO;
 import com.baro.domain.order.repository.JPAMongoOrderRepository;
+import com.baro.domain.order.repository.enumeration.OrderStatus;
 import com.baro.domain.order.util.GcodeMoveCoordinateData;
 import com.baro.domain.order.util.GcodeMoveSpeedData;
 import com.baro.domain.order.util.GenerateOrderCodeUtil;
@@ -56,6 +57,7 @@ public class OrderService {
 
        return order;
     }
+
 
     public OrderStoreDataDTO order_cocktail_service(OrderCocktailDTO orderData){
         String userPhoneNumber = orderData.getPhoneNumber();
@@ -156,6 +158,7 @@ public class OrderService {
         order.setMachineId(orderStoreData.getMachine_id());
         order.setUserPhoneNumber(orderStoreData.getUser_phoneNumber());
         order.setCreateOrderTime(orderStoreData.getCreateOrderTime());
+        order.setStatus(OrderStatus.WAITING);
         order.setTotalPrice(orderStoreData.getTotal_price());
         order.setRecipeList(orderStoreData.getRecipeList());
         // register order Bils

@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @RestController
@@ -81,12 +82,47 @@ public class OrderController {
 
             // StringBuilder를 String으로 변환
             String gcode = gcodeBuilder.toString();
+
+            // order status -> waiting -> in_progress
+            int maxRetries = 3;
+            int currentRetry = 0;
+
+            while (currentRetry < maxRetries) {
+                // 주문 상태 업데이트 시도
+                if (!makeCocktailService.order_make_cocktail_inProgress(orderCode)) {
+                    try {
+                        TimeUnit.SECONDS.sleep(3);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
+
+                    currentRetry++;
+                } else {
+                    // 성공한 경우 반복문 탈출
+                    break;
+                }
+            }
+
+            // 최대 재시도 횟수를 초과하여도 성공하지 못한 경우에 대한 처리
+            if (currentRetry == maxRetries) {
+                log.info("재시도 횟수를 초과하여 주문 상태 업데이트에 실패했습니다.");
+
+                response.put("status", "error");
+                response.put("message", "Failed to Server Status update -> please connect to developer");
+
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+            }
+            /**
+             * message send logic 추가하기
+             */
             String userPhone = order.getUserPhoneNumber();
 
             // 처리 완료 후 응답
+            response.put("orderCode" , orderCode);
             response.put("status", "success");
             response.put("message", "Order placed successfully.");
-            response.put("gcode", gcode); // gcode를 JSON 응답에 추가
+            response.put("gCode", gcode); // gcode를 JSON 응답
+
         } else {
             // order 데이터가 없는 경우
             response.put("status", "error");

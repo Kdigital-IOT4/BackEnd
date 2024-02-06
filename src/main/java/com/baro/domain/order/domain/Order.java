@@ -1,6 +1,7 @@
 package com.baro.domain.order.domain;
 
 import com.baro.domain.order.repository.DTO.OrderStoreDataRecipeDTO;
+import com.baro.domain.order.repository.enumeration.OrderStatus;
 import jakarta.persistence.Id;
 import lombok.Data;
 import lombok.Getter;
@@ -20,6 +21,7 @@ public class Order {
     private String orderCode;
     private String machineId;
     private String userPhoneNumber;
+    private OrderStatus status;
     private int totalPrice;
     private LocalDateTime createOrderTime;
     private List<OrderStoreDataRecipeDTO> recipeList;

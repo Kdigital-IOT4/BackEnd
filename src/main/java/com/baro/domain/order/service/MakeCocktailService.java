@@ -28,13 +28,7 @@ import java.util.Optional;
 @Service
 public class MakeCocktailService {
 
-
-    private final MachineService machineService;
-    private final GenerateOrderCodeUtil generateOrderCodeUtil;
-    private final CocktailService cocktailService;
-    private final RecipeService recipeService;
     private final JPAMongoOrderRepository mongoOrderRepository;
-    private final CocktailQueueService cocktailQueueService;
     private final MachineBaseService machineBaseService;
 
     public boolean order_make_cocktail_inProgress(String orderCode) {

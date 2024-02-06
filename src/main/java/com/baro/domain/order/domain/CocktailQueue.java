@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.time.LocalDateTime;
+
 @Document(collection = "cocktailQueue")
 @Getter
 @Setter
@@ -15,4 +17,5 @@ public class CocktailQueue {
     private String machineId;
     private String orderCode;
     private int waitingLine;
+    private LocalDateTime createOrderTime;
 }

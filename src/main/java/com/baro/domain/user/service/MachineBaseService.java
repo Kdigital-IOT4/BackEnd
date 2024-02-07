@@ -57,6 +57,7 @@ public class MachineBaseService {
 
     }
 
+
     public MachineBaseReadDAO read_machine_base_service(String machineId) {
         Machine machine = machineRepository.findById(machineId);
         List<MachineBase> machineBaseList = machineBaseRepository.findByMachineAndIsDELETED(machine, false);

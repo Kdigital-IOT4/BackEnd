@@ -3,6 +3,7 @@ package com.baro.domain.order.controller;
 import com.baro.domain.order.domain.Order;
 import com.baro.domain.order.repository.DTO.OrderCocktailDTO;
 import com.baro.domain.order.repository.DTO.OrderStoreDataDTO;
+import com.baro.domain.order.service.CancelCocktailService;
 import com.baro.domain.order.service.CompletedCocktailService;
 import com.baro.domain.order.service.MakeCocktailService;
 import com.baro.domain.order.service.OrderService;
@@ -26,6 +27,7 @@ public class OrderController {
     private final OrderService orderService;
     private final MakeCocktailService makeCocktailService;
     private final CompletedCocktailService completedcocktailService;
+    private final CancelCocktailService cancelCocktailService;
     @PostMapping("/orderCocktail")
     public ResponseEntity order_cocktail_controller(@RequestBody OrderCocktailDTO orderCocktailDTO){
         log.info("order_cocktail_start");
@@ -185,7 +187,55 @@ public class OrderController {
             return buildErrorResponse(response, HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error.");
         }
     }
+    @GetMapping("/cancelCocktail/{orderCode}")
+    public ResponseEntity<Map<String, Object>> cancelCocktailController(@PathVariable String orderCode) {
+        Map<String, Object> response = new HashMap<>();
+        log.info("완료된 칵테일 주문을 처리합니다.");
+        try {
+            String statusChangeResult = cancelCocktailService.cancel_cocktail_changeStatues_service(orderCode );
+            log.info("statues 변경 : {}" , statusChangeResult);
+            if ("success".equals(statusChangeResult)) {
+                Integer lineNumber = completedcocktailService.complete_cocktail_changeQueueChecker_service(orderCode);
 
+                if (lineNumber == null) {
+                    // 서버 오류 발생
+                    log.warn("Change Queue Checker Error");
+                    return buildErrorResponse(response, HttpStatus.INTERNAL_SERVER_ERROR, "Failed to update server status.");
+                }
+
+                String machineId = orderService.order_data_find_service(orderCode).get().getMachineId();
+                String nextOrderCode = completedcocktailService.find_next_orderCode_service(machineId, lineNumber);
+
+                if ("fail".equals(nextOrderCode)) {
+                    // 서버 오류 발생
+                    log.warn("Next Order Code Find Error");
+                    return buildErrorResponse(response, HttpStatus.INTERNAL_SERVER_ERROR, "Failed to find next order.");
+                } else if ("not exists next order".equals(nextOrderCode)) {
+                    // 마지막 주문까지 완료
+                    return buildSuccessResponse(response, orderCode, "Last order completed.", null);
+                }
+
+                // 다음 주문이 있는 경우
+                return buildSuccessResponse(response, orderCode, "Order placed successfully.", nextOrderCode);
+            } else {
+                // 주문 에러 발생
+                log.warn("Error occurred for cocktail order. OrderCode: {}", orderCode);
+                String errorMessage = "Failed to place order.";
+
+                if ("fail".equals(statusChangeResult)) {
+                    errorMessage = "Order checking problem occurred.";
+                    return buildErrorResponse(response, HttpStatus.BAD_REQUEST, errorMessage);
+                }
+
+                // 서버 오류 발생
+                return buildErrorResponse(response, HttpStatus.INTERNAL_SERVER_ERROR, errorMessage);
+            }
+        } catch (Exception e) {
+            // 예외 처리
+            log.error("Exception occurred: {}", e.getMessage(), e);
+            return buildErrorResponse(response, HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error.");
+        }
+    }
     private ResponseEntity<Map<String, Object>> buildSuccessResponse(Map<String, Object> response, String orderCode,
                                                                      String message, String nextOrderCode) {
         response.put("orderCode", orderCode);

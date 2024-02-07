@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.MongoId;
 
 import java.time.LocalDateTime;
 
@@ -13,7 +14,7 @@ import java.time.LocalDateTime;
 @Setter
 @Data
 public class CocktailQueueChecker {
-    @Id
+    @MongoId
     private String machineId;
     private int waitingLineChecker;
     private LocalDateTime createOrderTime;

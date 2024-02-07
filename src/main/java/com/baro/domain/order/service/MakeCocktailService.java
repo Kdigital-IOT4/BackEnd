@@ -33,14 +33,12 @@ public class MakeCocktailService {
 
     public boolean order_make_cocktail_inProgress(String orderCode) {
         // 주문 코드로 주문을 찾기
-        Optional<Order> optionalOrder = mongoOrderRepository.findByOrderCode(orderCode);
+        Optional<Order> optionalOrder = mongoOrderRepository.findByOrderCodeAndStatus(orderCode , OrderStatus.WAITING);
 
         if (optionalOrder.isPresent()) {
-            // Optional에서 Order 객체를 얻어와서 주문 상태를 업데이트
             Order order = optionalOrder.get();
             order.setStatus(OrderStatus.IN_PROGRESS);
 
-            // MongoDB에 업데이트된 주문 저장
             mongoOrderRepository.save(order);
 
             return true; // 업데이트 성공

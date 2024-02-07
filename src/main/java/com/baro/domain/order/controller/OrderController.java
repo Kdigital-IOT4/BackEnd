@@ -139,10 +139,10 @@ public class OrderController {
     @GetMapping("/completedCocktail/{orderCode}")
     public ResponseEntity<Map<String, Object>> completeCocktailController(@PathVariable String orderCode) {
         Map<String, Object> response = new HashMap<>();
-
+        log.info("완료된 칵테일 주문을 처리합니다.");
         try {
             String statusChangeResult = completedcocktailService.complete_cocktail_changeStatues_service(orderCode);
-
+            log.info("statues 변경 : {}" , statusChangeResult);
             if ("success".equals(statusChangeResult)) {
                 Integer lineNumber = completedcocktailService.complete_cocktail_changeQueueChecker_service(orderCode);
 

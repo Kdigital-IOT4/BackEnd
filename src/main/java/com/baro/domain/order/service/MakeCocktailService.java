@@ -96,6 +96,7 @@ public class MakeCocktailService {
                     throw new NoSuchElementException("Base not found for order_data_baseSeq: " + orderDataBaseSeq);
                 }
             }
+            baseLineList.add(0);
         }
 
         // 나머지 로직 작성하기 ... ?
@@ -106,10 +107,18 @@ public class MakeCocktailService {
         StringBuilder gcodeBuilder = new StringBuilder();
 
         for (Integer baseLine : baseLineList) {
-            GcodeMoveCoordinateData coordinateData = getCoordinateDataByBaseLine(baseLine);
             GcodeMoveSpeedData speedData = getMoveSpeedByMachine(speed);
-            gcodeBuilder.append(String.format("$J=G53X%dY%dZ%dF%d\n", coordinateData.getX(), coordinateData.getY(), coordinateData.getZ(),speedData.getF()));
-            log.info("success make Gcode");
+
+            if(baseLine == 0 ){
+                //한잔의 칵테일이 완성되었다.
+                gcodeBuilder.append(String.format("$J=G53X0Y0Z0F%d\n",speedData.getF()));
+            }else{
+                GcodeMoveCoordinateData coordinateData = getCoordinateDataByBaseLine(baseLine);
+
+                gcodeBuilder.append(String.format("$J=G53X%dY%dZ%dF%d\n", coordinateData.getX(), coordinateData.getY(), coordinateData.getZ(),speedData.getF()));
+                log.info("success make Gcode");
+            }
+
         }
 
         return gcodeBuilder;

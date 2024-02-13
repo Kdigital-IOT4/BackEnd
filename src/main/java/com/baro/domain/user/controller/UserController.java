@@ -14,6 +14,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Slf4j
 @RestController
 @RequestMapping("/api/v1/user")
@@ -37,14 +40,31 @@ public class UserController {
     }
     @PostMapping("/machine/login")
     public ResponseEntity machine_login_controller(@RequestBody MachineLoginDTO machineLoginDTO){
+        Map<String, Object> response = new HashMap<>();
+
+        if(!machineService.check_machine_id(machineLoginDTO.getMachineId())){
+            //존재하지 않음
+            response.put("machine_id", machineLoginDTO.getMachineId());
+            response.put("status", "fail");
+            response.put("message", "not found ID");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
+
         String return_text = machineService.machine_login_service(machineLoginDTO);
         if(return_text.equals("success")){
             //로그인성공
-            Machine machine_data = machineService.find_machine_data_service(machineLoginDTO.getMachineId());
-            return ResponseEntity.ok(machine_data);
+            response.put("machine_id", machineLoginDTO.getMachineId());
+            response.put("status", "success");
+            response.put("message", "success login");
+
+
+            return ResponseEntity.ok(response);
         }else{
-            //로그인실패
-            return  ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(return_text);
+            response.put("machine_id", machineLoginDTO.getMachineId());
+            response.put("status", "fail");
+            response.put("message", "not found");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+
         }
     }
     @GetMapping("/admin/login")

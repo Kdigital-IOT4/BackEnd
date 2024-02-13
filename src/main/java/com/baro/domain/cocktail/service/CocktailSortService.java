@@ -83,6 +83,7 @@ public class CocktailSortService {
 
     private CocktailDAO convertToCocktailDAO(Cocktail cocktail) {
         CocktailDAO cocktailDAO = new CocktailDAO();
+        cocktailDAO.setSeq(cocktail.getSeq());
         cocktailDAO.setEN_Name(cocktail.getName());
         cocktailDAO.setKR_Name(cocktail.getKrName());
         cocktailDAO.setPrice(cocktail.getPrice());

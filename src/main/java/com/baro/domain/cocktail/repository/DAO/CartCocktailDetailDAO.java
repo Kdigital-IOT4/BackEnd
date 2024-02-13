@@ -7,13 +7,10 @@ import lombok.extern.slf4j.Slf4j;
 @Getter
 @Setter
 @Slf4j
-public class CocktailDAO {
+public class CartCocktailDetailDAO {
     private Long seq;
-    private String EN_Name;
-    private String KR_Name;
+    private String en_name;
+    private String kr_name;
     private int price;
-    private int amount;
-    private int alcohol;
-    private  String content;
-    private String imgURL;
+    private String img_URL;
 }

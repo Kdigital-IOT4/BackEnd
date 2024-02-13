@@ -30,7 +30,7 @@ public class MachineController {
     private final BaseService baseService;
     private final MachineBaseService machineBaseService;
 
-    @GetMapping("/data/read")
+    @PostMapping("/data/read")
     public ResponseEntity machine_base_data_read_controller(@RequestBody MachineBaseReadDTO baseReadDTO){
         if(machineService.check_machine_id(baseReadDTO.getMachineId())){
             //아이디가 존재

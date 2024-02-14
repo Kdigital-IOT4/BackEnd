@@ -2,18 +2,14 @@ package com.baro.domain.order.service;
 
 import com.baro.domain.cocktail.repository.DAO.BaseMachineReadDAO;
 import com.baro.domain.cocktail.repository.DAO.RecipeDAO;
-import com.baro.domain.cocktail.service.CocktailService;
-import com.baro.domain.cocktail.service.RecipeService;
 import com.baro.domain.order.domain.Order;
 import com.baro.domain.order.repository.DTO.OrderStoreDataRecipeDTO;
 import com.baro.domain.order.repository.JPAMongoOrderRepository;
 import com.baro.domain.order.repository.enumeration.OrderStatus;
 import com.baro.domain.order.util.GcodeMoveCoordinateData;
 import com.baro.domain.order.util.GcodeMoveSpeedData;
-import com.baro.domain.order.util.GenerateOrderCodeUtil;
 import com.baro.domain.user.repository.DAO.MachineBaseReadDAO;
 import com.baro.domain.user.service.MachineBaseService;
-import com.baro.domain.user.service.MachineService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -26,7 +22,7 @@ import java.util.Optional;
 @Slf4j
 @RequiredArgsConstructor
 @Service
-public class MakeCocktailService {
+public class MakeOrderService {
 
     private final JPAMongoOrderRepository mongoOrderRepository;
     private final MachineBaseService machineBaseService;

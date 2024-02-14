@@ -3,9 +3,9 @@ package com.baro.domain.order.controller;
 import com.baro.domain.order.domain.Order;
 import com.baro.domain.order.repository.DTO.OrderCocktailDTO;
 import com.baro.domain.order.repository.DTO.OrderStoreDataDTO;
-import com.baro.domain.order.service.CancelCocktailService;
-import com.baro.domain.order.service.CompletedCocktailService;
-import com.baro.domain.order.service.MakeCocktailService;
+import com.baro.domain.order.service.CancelOrderService;
+import com.baro.domain.order.service.CompletedOrderService;
+import com.baro.domain.order.service.MakeOrderService;
 import com.baro.domain.order.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,9 +25,9 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class OrderController {
     private final OrderService orderService;
-    private final MakeCocktailService makeCocktailService;
-    private final CompletedCocktailService completedcocktailService;
-    private final CancelCocktailService cancelCocktailService;
+    private final MakeOrderService makeOrderService;
+    private final CompletedOrderService completedcocktailService;
+    private final CancelOrderService cancelOrderService;
     @PostMapping("/orderCocktail")
     public ResponseEntity order_cocktail_controller(@RequestBody OrderCocktailDTO orderCocktailDTO){
         log.info("order_cocktail_start");
@@ -81,7 +81,7 @@ public class OrderController {
         if (orderOptional.isPresent()) {
             // order 데이터가 존재할 경우
             Order order = orderOptional.get();
-            StringBuilder gcodeBuilder = makeCocktailService.order_make_cocktail_service(order, speed);
+            StringBuilder gcodeBuilder = makeOrderService.order_make_cocktail_service(order, speed);
 
             // StringBuilder를 String으로 변환
             String gcode = gcodeBuilder.toString();
@@ -92,7 +92,7 @@ public class OrderController {
 
             while (currentRetry < maxRetries) {
                 // 주문 상태 업데이트 시도
-                if (!makeCocktailService.order_make_cocktail_inProgress(orderCode)) {
+                if (!makeOrderService.order_make_cocktail_inProgress(orderCode)) {
                     try {
                         TimeUnit.SECONDS.sleep(3);
                     } catch (InterruptedException e) {
@@ -192,7 +192,7 @@ public class OrderController {
         Map<String, Object> response = new HashMap<>();
         log.info("완료된 칵테일 주문을 처리합니다.");
         try {
-            String statusChangeResult = cancelCocktailService.cancel_cocktail_changeStatues_service(orderCode );
+            String statusChangeResult = cancelOrderService.cancel_cocktail_changeStatues_service(orderCode );
             log.info("statues 변경 : {}" , statusChangeResult);
             if ("success".equals(statusChangeResult)) {
                 Integer lineNumber = completedcocktailService.complete_cocktail_changeQueueChecker_service(orderCode);

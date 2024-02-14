@@ -14,7 +14,7 @@ import java.util.Optional;
 @Slf4j
 @RequiredArgsConstructor
 @Service
-public class CancelCocktailService {
+public class CancelOrderService {
 
     private final JPAMongoOrderRepository mongoOrderRepository;
     private final JPAMongoCocktailQueueCheckerRepository mongoCocktailQueueCheckerRepository;

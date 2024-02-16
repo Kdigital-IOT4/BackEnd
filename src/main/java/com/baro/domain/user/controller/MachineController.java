@@ -23,7 +23,8 @@ import java.util.Set;
 @Slf4j
 @RestController
 @RequestMapping("/api/v1/machine")
-@CrossOrigin(origins = "http://localhost:3000", allowedHeaders = {"Authorization", "Content-Type"})
+@CrossOrigin(origins = {"http://localhost:3000", "http://15.165.86.77"}, allowedHeaders = {"Authorization", "Content-Type"})
+
 @RequiredArgsConstructor
 public class MachineController {
     private final MachineService machineService;

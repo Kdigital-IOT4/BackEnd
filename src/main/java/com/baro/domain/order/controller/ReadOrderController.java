@@ -1,6 +1,8 @@
 package com.baro.domain.order.controller;
 
+import com.baro.domain.order.repository.DAO.OrderReadDAO;
 import com.baro.domain.order.repository.DAO.OrderWaitingListDAO;
+import com.baro.domain.order.service.OrderService;
 import com.baro.domain.order.service.ReadOrderService;
 import com.baro.domain.user.service.MachineService;
 import lombok.RequiredArgsConstructor;
@@ -20,8 +22,34 @@ import java.util.Map;
 public class ReadOrderController {
     private final MachineService machineService;
     private final ReadOrderService readOrderService;
+    private final OrderService orderService;
 
     Map<String, Object> response = new HashMap<>();
+
+    @GetMapping("/orderProcess/{orderCode}")
+    public ResponseEntity<Map<String, Object>> read_order_orderCode_data_controller(@PathVariable String orderCode){
+        if(! orderService.orderCode_check_service(orderCode)){
+            //존재하지 않음
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(createErrorResponse("Failed to place. Please check your OrderCode"));
+        }
+
+        OrderReadDAO orderData = readOrderService.read_order_orderCode_data_service(orderCode);
+        if(orderData != null){
+            response.put("orderCode", orderCode);
+            response.put("status", "success");
+            response.put("message", "success get order Data");
+            response.put("data", orderData);
+        }else {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(createErrorResponse("Order data not found for orderCode: " + orderCode));
+        }
+
+        return ResponseEntity.ok(response);
+
+    }
     @GetMapping("/{machine_id}")
     public ResponseEntity<Map<String, Object>> read_order_waitingList_controller(@PathVariable String machine_id){
         log.info("reade order -> waiting List start");

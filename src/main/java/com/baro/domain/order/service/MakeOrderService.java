@@ -7,6 +7,7 @@ import com.baro.domain.order.repository.DTO.OrderStoreDataRecipeDTO;
 import com.baro.domain.order.repository.JPAMongoOrderRepository;
 import com.baro.domain.order.repository.enumeration.OrderStatus;
 import com.baro.domain.order.util.GcodeMoveCoordinateData;
+import com.baro.domain.order.util.GcodeMoveCoordinateDataUp;
 import com.baro.domain.order.util.GcodeMoveSpeedData;
 import com.baro.domain.user.repository.DAO.MachineBaseReadDAO;
 import com.baro.domain.user.service.MachineBaseService;
@@ -110,8 +111,16 @@ public class MakeOrderService {
                 gcodeBuilder.append(String.format("$J=G53X0Y0Z0F%d\n",speedData.getF()));
             }else{
                 GcodeMoveCoordinateData coordinateData = getCoordinateDataByBaseLine(baseLine);
-
-                gcodeBuilder.append(String.format("$J=G53X%dY%dZ%dF%d\n", coordinateData.getX(), coordinateData.getY(), coordinateData.getZ(),speedData.getF()));
+                GcodeMoveCoordinateDataUp coordinateDataUp = getCoordinateUpDataByBaseLine(baseLine);
+                /**
+                 * 요구사항
+                 * 1. 좌표계값으로 이동 (f 20000 (fast))
+                 * 2. 이동후 수직상승 (z : 900)
+                 * 3. 복귀 (기존좌표계로이동)
+                 */
+                gcodeBuilder.append(String.format("$J=G53X%dY%dZ%dF%d\n", coordinateData.getX(), coordinateData.getY(), coordinateData.getZ(),speedData.getF())); //1
+                gcodeBuilder.append(String.format("$J=G53X%dY%dZ%dF%d\n", coordinateDataUp.getX(), coordinateDataUp.getY(), coordinateDataUp.getZ(),15000)); //2
+                gcodeBuilder.append(String.format("$J=G53X%dY%dZ%dF%d\n", coordinateData.getX(), coordinateData.getY(), coordinateData.getZ(),speedData.getF())); //3
                 log.info("success make Gcode");
             }
 
@@ -130,6 +139,21 @@ public class MakeOrderService {
                 return GcodeMoveCoordinateData.THIRD;
             case 4:
                 return GcodeMoveCoordinateData.FORE;
+            default:
+                throw new IllegalArgumentException("Invalid baseLine: " + baseLine);
+        }
+    }
+
+    private GcodeMoveCoordinateDataUp getCoordinateUpDataByBaseLine(int baseLine) {
+        switch (baseLine) {
+            case 1:
+                return GcodeMoveCoordinateDataUp.FIRST;
+            case 2:
+                return GcodeMoveCoordinateDataUp.SECOND;
+            case 3:
+                return GcodeMoveCoordinateDataUp.THIRD;
+            case 4:
+                return GcodeMoveCoordinateDataUp.FORE;
             default:
                 throw new IllegalArgumentException("Invalid baseLine: " + baseLine);
         }
